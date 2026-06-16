@@ -1,0 +1,165 @@
+{
+  "name": "HealthyChefBot",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -16,
+        -112
+      ],
+      "id": "8a667e8c-d903-4079-aa70-577e7e6b85ac",
+      "name": "Telegram Trigger",
+      "webhookId": "REDACTED",
+      "credentials": {
+        "telegramApi": {
+          "id": "REDACTED"",
+          "name": "Telegram account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $('Telegram Trigger').item.json.message.text }}",
+        "options": {
+          "systemMessage": "You are a personal AI nutritionist and chef assistant. \n\nRemember the user's dietary preferences, allergies, and health goals throughout the conversation.\n\nWhen the user tells you ingredients they have, suggest one healthy recipe with:\n🍽️ Recipe name\n⏱️ Prep time\n🔥 Calories per serving\n💪 Macros: Protein / Carbs / Fat\n📝 Ingredients needed\n👩‍🍳 Steps (max 5)\n\nAlways consider:\n- Their health goals if mentioned\n- Their dietary restrictions if mentioned\n- Keep it practical and delicious!\n\nIf the user hasn't mentioned health goals yet, ask them once at the start.\n\nKeep it short, practical and delicious!"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        192,
+        -112
+      ],
+      "id": "71801e78-8611-451e-b948-7a9ac11d2382",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "claude-haiku-4-5-20251001",
+          "mode": "list",
+          "cachedResultName": "Claude Haiku 4.5"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+      "typeVersion": 1.4,
+      "position": [
+        64,
+        96
+      ],
+      "id": "eb7690cb-453d-42a2-a58d-efde10526655",
+      "name": "Anthropic Chat Model",
+      "credentials": {
+        "anthropicApi": {
+          "id": "REDACTED"",
+          "name": "Anthropic account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "={{ $json.output }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        544,
+        -112
+      ],
+      "id": "4505a1ab-0cbf-4018-9a7a-8673e198a653",
+      "name": "Send a text message",
+      "webhookId": "REDACTED"",
+      "credentials": {
+        "telegramApi": {
+          "id": "REDACTED"",
+          "name": "Telegram account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Telegram Trigger').item.json.message.chat.id }}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        288,
+        112
+      ],
+      "id": "f87b770a-bb64-45be-ad53-4d54d04a06fe",
+      "name": "Simple Memory"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Anthropic Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "ce087a31-e83d-45a7-9c6b-8e1e07e0d1ae",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "REDACTED"
+  },
+  "id": "REDACTED"",
+  "tags": []
+}

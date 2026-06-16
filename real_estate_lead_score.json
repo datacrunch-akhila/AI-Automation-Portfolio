@@ -1,0 +1,238 @@
+{
+  "name": "My workflow 3",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "53521b95-5b87-4717-b6b5-2e1a2a393006",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -416,
+        0
+      ],
+      "id": "37cffa35-fa7c-4da1-b885-e9fdedb85671",
+      "name": "Webhook",
+      "webhookId": "53521b95-5b87-4717-b6b5-2e1a2a393006"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Score this real estate lead as Hot, Warm or Cold:\n\nName: {{ $json.query.name }}\nEmail: {{ $json.query.email }}\nPhone: {{ $json.query.phone }}\nProperty: {{ $json.query.property }}\nBudget: AED {{ $json.query.budget }}\n\nGive rating and one sentence explanation.",
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        -208,
+        0
+      ],
+      "id": "5d76b6a6-03a4-40c4-8102-dc7b01202c0d",
+      "name": "Basic LLM Chain"
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "REDACTED",
+          "mode": "list",
+          "cachedResultName": "Application form",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/REDACTED/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/REDACTEDedit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Name": "={{$('Webhook').item.json.query.name}}",
+            "Email": "={{$('Webhook').item.json.query.email}}",
+            "Phone": "={{$('Webhook').item.json.query.phone}}"
+          },
+          "matchingColumns": [
+            "Email"
+          ],
+          "schema": [
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Phone",
+              "displayName": "Phone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Property interest (villa, apartment, etc.)",
+              "displayName": "Property interest (villa, apartment, etc.)",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Budget",
+              "displayName": "Budget",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        144,
+        0
+      ],
+      "id": "b366519d-ce4d-4d7f-aff3-edf2f665e827",
+      "name": "Append or update row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "REDACTED",
+          "name": "Google Sheets OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "claude-haiku-4-5-20251001",
+          "mode": "list",
+          "cachedResultName": "Claude Haiku 4.5"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+      "typeVersion": 1.4,
+      "position": [
+        -288,
+        208
+      ],
+      "id": "19e507e7-83cd-4b7c-8164-da37f53ed460",
+      "name": "Anthropic Chat Model",
+      "credentials": {
+        "anthropicApi": {
+          "id": "REDACTED",
+          "name": "Anthropic account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "sales-team@example.com",
+        "subject": " Real Estate Lead Capture Bot ",
+        "message": "=New Lead Received!\n\nName: {{ $('Webhook').item.json.query.name }}\nEmail: {{ $('Webhook').item.json.query.email }}\nPhone: {{ $('Webhook').item.json.query.phone }}\nProperty: {{ $('Webhook').item.json.query.property }}\nBudget: {{ $('Webhook').item.json.query.budget }}\n\nAI Lead Score: {{ $('Basic LLM Chain').item.json.text }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        352,
+        0
+      ],
+      "id": "34f26ed6-8eee-4f1c-ba16-8be0b0d9d70b",
+      "name": "Send a message",
+      "webhookId": "df751591-7db6-4ee8-a42c-2d3b2d85e52a",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "REDACTED",
+          "name": "Gmail OAuth2 API"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain": {
+      "main": [
+        [
+          {
+            "node": "Append or update row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Anthropic Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append or update row in sheet": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "REDACTED",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "REDACTED"
+  },
+  "id": "REDACTED
+}
